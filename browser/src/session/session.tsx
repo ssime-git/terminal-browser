@@ -485,12 +485,16 @@ class Session {
 
   private tabViews(): TabView[] {
     const active = this.tabs.active;
+    const split = this.activeRecord()?.reviewing ? null : this.tabs.split;
     return this.tabs.all().map((tab) => ({
       id: tab.id,
       url: tab.url,
       ref: tab.ref,
       active: tab.id === active?.id,
-      hidden: this.sessionHidden,
+      hidden: this.sessionHidden || (split ? !split.includes(tab.id) : tab.id !== active?.id),
+      rect: split && this.layout?.splitPages
+        ? this.layout.splitPages[split[0] === tab.id ? 0 : 1]
+        : this.layout!.page,
       partition: this.partition,
       proxy: this.socksPort ? `socks5://127.0.0.1:${this.socksPort}` : null,
       preload: this.browserPreload,
@@ -505,6 +509,9 @@ class Session {
   }
 
   private readonly tabActions: TabActions = {
+    focus: (id) => {
+      if (id !== this.tabs.active?.id) this.tabs.activate(id);
+    },
     state: (id, state) => this.tabs.stateChanged(id, state),
     openWindow: (id, details) => this.tabs.openWindow(id, details),
     contextMenu: (id, params) => this.tabs.contextMenu(id, params),
@@ -590,6 +597,18 @@ class Session {
     tabClose: (id) => this.closeOrShutdown(id),
     tabNew: () => this.openNewTabModal(),
     tabMenu: () => this.toggleToolbarMenu(),
+    splitToggle: () => this.tabs.toggleSplit(),
+    splitDividerHover: (hovering) => {
+      this.root?.setPointerShape(hovering ? "ew-resize" : "default");
+    },
+    splitDividerDrag: (event) => {
+      const pages = this.layout?.splitPages;
+      if (!pages || event.phase === "start") return;
+      const [left, right] = pages;
+      this.splitFraction = clampDevtoolsFraction((event.x - left.x) / (right.x + right.width - left.x));
+      this.recalculateLayout();
+      this.render();
+    },
     grab: () => void this.toggleGrab(),
     newTabQuery: (text) => this.newTabQuery(text),
     newTabSubmit: (text) => {
@@ -606,7 +625,10 @@ class Session {
       this.render();
     },
     devtoolsDividerDrag: (event) => {
-      const page = this.layout?.page;
+      const pages = this.layout?.splitPages;
+      const page = pages
+        ? { ...pages[0], width: pages[1].x + pages[1].width - pages[0].x }
+        : this.layout?.page;
       const devtools = this.layout?.devtools;
       if (!page || !devtools) return;
       if (event.phase === "start") {
@@ -779,7 +801,10 @@ class Session {
       this.shutdown();
       return true;
     }
-    if (process.platform === "linux" && event.mods.ctrl && event.key === "c") {
+    if (
+      process.platform === "linux" && event.mods.ctrl && !event.mods.shift &&
+      !event.mods.alt && !event.mods.super && event.key === "c"
+    ) {
       this.showToast("ctrl+q to quit", "alert");
       return true;
     }
@@ -871,6 +896,18 @@ class Session {
       case "url.edit":
         this.openUrlEdit();
         return;
+      case "url.copy":
+        if (handle) {
+          this.root?.setClipboard(handle.state.url);
+          this.showToast("URL copied to clipboard", "done");
+        }
+        return;
+      case "split.toggle":
+        this.tabs.toggleSplit();
+        return;
+      case "split.focus":
+        this.tabs.focusOtherPane();
+        return;
       case "find":
         this.openFind();
         return;
@@ -925,6 +962,7 @@ class Session {
     this.tabs.activeHandle?.zoom(direction);
   }
 
+  private splitFraction = 0.5;
   private uiZoom = 1;
   private uiBasePx: number | null = null;
 
@@ -1462,6 +1500,9 @@ class Session {
     });
     return [
       command("find"),
+      command("url.copy"),
+      command("split.toggle"),
+      command("split.focus"),
       command("record.toggle"),
       command("grab.toggle"),
       command("devtools.toggle"),
@@ -1558,6 +1599,9 @@ class Session {
       reviewing ? null : placement,
       reviewing ? recordBarHeight(info) : 0,
       this.settings.get("tabs.position"),
+      this.tabs.split && !reviewing
+        ? { fraction: this.splitFraction, active: this.tabs.split[0] === this.tabs.active?.id ? 0 : 1 }
+        : null,
     );
     this.layout = result.chrome;
     this.surfaceLayout = result.surface;

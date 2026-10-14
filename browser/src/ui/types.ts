@@ -144,6 +144,9 @@ export interface ChromeActions {
   tabClose(id: number): void;
   tabNew(): void;
   tabMenu(): void;
+  splitToggle(): void;
+  splitDividerDrag(event: DragEvent): void;
+  splitDividerHover(hovering: boolean): void;
   grab(): void;
   newTabQuery(text: string): void;
   newTabSubmit(text: string): void;
@@ -167,6 +170,7 @@ export interface ChromeLayout {
   recordBarHeight: number;
   contentHeight: number;
   page: { x: number; y: number; width: number; height: number };
+  splitPages: [ChromeLayout["page"], ChromeLayout["page"]] | null;
   devtools: {
     x: number;
     y: number;
@@ -188,9 +192,11 @@ export interface TabView {
   preload: string | null;
   clipboardRead: boolean;
   transparent: boolean;
+  rect: ChromeLayout["page"];
 }
 
 export interface TabActions {
+  focus(id: number): void;
   state(id: number, state: WebViewState): void;
   openWindow(id: number, details: Electron.HandlerDetails): OpenWindowDecision;
   contextMenu(id: number, params: Electron.ContextMenuParams): void;

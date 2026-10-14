@@ -26,6 +26,7 @@ export const ICONS = {
   back: "M 14.5 5.5 L 8 12 L 14.5 18.5",
   forward: "M 9.5 5.5 L 16 12 L 9.5 18.5",
   down: "M 5.5 9.5 L 12 16 L 18.5 9.5",
+  split: "M 3 5 L 21 5 L 21 19 L 3 19 Z M 12 5 L 12 19",
   copy: "M 9 9 L 19 9 L 19 19 L 9 19 Z M 5 15 L 5 5 L 15 5",
   check: "M 6 12.5 L 10 16.5 L 18 7.5",
   // Lucide "settings", arcs rewritten as cubics since the engine only takes M L Q C Z.

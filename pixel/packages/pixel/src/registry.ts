@@ -15,6 +15,7 @@ export interface ViewEntry {
   externalDevtoolsAction: ((action: "close" | "dock-bottom" | "dock-right") => void) | null;
   toggleDevtools(): void;
   handleKey(event: EngineKeyEvent): boolean;
+  onFocus?(): void;
   // Views without a PageHost (a guest app's pixels) take these directly.
   paste?(text: string): void;
   setActive?(focused: boolean): void;
@@ -65,6 +66,7 @@ export class ViewRegistry {
     if (this.focused !== entry) {
       this.setActive(this.focused, false);
       this.focused = entry;
+      entry.onFocus?.();
       if (!entry.host) entry.setActive?.(true);
     }
     const host = entry.host;

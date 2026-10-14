@@ -43,6 +43,7 @@ const AGENT_CONTROL_SWEEP_MS = 500;
 export class TabManager {
   private tabs: Tab[] = [];
   private activeId = 0;
+  private splitPair: [number, number] | null = null;
   private seq = 1;
   private agentSweep: ReturnType<typeof setInterval> | null = null;
 
@@ -69,6 +70,28 @@ export class TabManager {
 
   all(): readonly Tab[] {
     return this.tabs;
+  }
+
+  get split(): readonly [number, number] | null {
+    return this.splitPair;
+  }
+
+  toggleSplit() {
+    if (!this.host.tabSwitchAllowed() || !this.active) return;
+    if (this.splitPair) {
+      this.splitPair = null;
+    } else {
+      const left = this.active;
+      const right = this.tabs.find((tab) => tab.id !== left.id) ?? this.create(this.fallbackUrl, false);
+      this.splitPair = [left.id, right.id];
+    }
+    this.host.onActivated();
+    this.host.requestRender();
+  }
+
+  focusOtherPane() {
+    if (!this.splitPair) return;
+    this.activate(this.splitPair.find((id) => id !== this.activeId)!);
   }
 
   create(url: string, activate = true): Tab {
@@ -162,6 +185,10 @@ export class TabManager {
   activate(id: number) {
     const tab = this.get(id);
     if (!tab || (id !== this.activeId && !this.host.tabSwitchAllowed())) return;
+    if (this.splitPair && !this.splitPair.includes(id)) {
+      const side = this.splitPair[0] === this.activeId ? 0 : 1;
+      this.splitPair[side] = id;
+    }
     this.activeId = id;
     tab.ref.current?.focus();
     this.host.onActivated();
@@ -171,12 +198,16 @@ export class TabManager {
   close(id: number) {
     const at = this.tabs.findIndex((t) => t.id === id);
     if (at < 0) return;
+    const wasActive = this.activeId === id;
+    const otherPane = this.splitPair?.includes(id) ? this.splitPair.find((pane) => pane !== id) : null;
+    if (otherPane != null) this.splitPair = null;
     this.tabs.splice(at, 1);
-    if (this.activeId === id) {
-      const fallback = this.tabs[Math.min(at, this.tabs.length - 1)];
+    if (wasActive) {
+      const fallback = this.get(otherPane ?? -1) ?? this.tabs[Math.min(at, this.tabs.length - 1)];
       if (fallback) this.activate(fallback.id);
       else this.create(this.fallbackUrl);
     }
+    if (otherPane != null && !wasActive) this.host.onActivated();
     this.host.onTabsChanged();
     this.host.requestRender();
   }
@@ -303,5 +334,6 @@ export class TabManager {
     this.stopAgentSweep();
     this.tabs = [];
     this.activeId = 0;
+    this.splitPair = null;
   }
 }

@@ -59,6 +59,7 @@ export interface WebViewProps {
   keepFrame?: boolean;
   scrollSpeed?: number;
   onChange?(state: WebViewState): void;
+  onFocus?(): void;
   onPointer?(event: PointerEvent): void;
   onContextMenu?(params: Electron.ContextMenuParams): void;
   onOpenWindow?: OpenWindowPolicy;
@@ -162,6 +163,7 @@ export const WebView = forwardRef<WebViewHandle, WebViewProps>(function WebView(
     [],
   );
   entry.devtoolsEnabled = devtoolsEnabled;
+  entry.onFocus = () => propsRef.current.onFocus?.();
   entry.toggleDevtools = () => {
     if (hostRef.current?.devtools) hostRef.current.closeDevtools();
     else setDevtoolsOpen(true);

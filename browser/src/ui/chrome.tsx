@@ -131,6 +131,7 @@ export function Chrome({
         coveredByReview={record?.canvas != null}
         scrollSpeed={scrollSpeed}
       />
+      {layout.splitPages && !record?.canvas && <SplitDivider layout={layout} actions={actions} theme={theme} />}
       {agentActive && <AgentGlow layout={layout} theme={theme} intensity={glowPulse} />}
       {layout.devtools && devtools && (
         <DevtoolsPane
@@ -296,7 +297,7 @@ function Toolbar({
     layout.width -
     rem * 0.8 -
     rem * 3.3 -
-    rem * 3.5 -
+    rem * 5.25 -
     (nav ? rem * 3.5 : 0) -
     (record ? rem * 7.25 : 0) -
     (profiling ? rem * 6.5 : 0);
@@ -362,6 +363,7 @@ function Toolbar({
           theme={theme}
         />
       )}
+      <ToolbarButton icon="split" enabled active={layout.splitPages != null} rem={rem} theme={theme} onClick={actions.splitToggle} />
       <ToolbarButton
         icon="select"
         enabled
@@ -535,24 +537,25 @@ function BrowserTabContents({
   const dock = layout.devtools?.dock ?? null;
   return (
     <>
-      {!coveredByReview && (
+      {!coveredByReview && tabs.filter((tab) => !tab.hidden).map((tab) => (
         <Box
+          key={tab.id}
           style={{
             position: "absolute",
-            inset: { top: layout.page.y - 1, left: layout.page.x - 1 },
-            width: layout.page.width + 2,
-            height: layout.page.height + 2,
+            inset: { top: tab.rect.y - 1, left: tab.rect.x - 1 },
+            width: tab.rect.width + 2,
+            height: tab.rect.height + 2,
             cornerRadius: seamRadius(layout.rem * 0.55, dock, "page"),
-            border: { width: 1, color: agentActive ? theme.accent : theme.frame },
+            border: { width: 1, color: tab.active && (agentActive || layout.splitPages) ? theme.accent : theme.frame },
           }}
         />
-      )}
+      ))}
       {tabs.map((tab) => (
         <WebView
           key={tab.id}
           ref={tab.ref}
           src={tab.url}
-          hidden={!tab.active || coveredByReview || tab.hidden}
+          hidden={coveredByReview || tab.hidden}
           autoFocus={tab.active}
           devtools={false}
           partition={tab.partition ?? undefined}
@@ -563,12 +566,13 @@ function BrowserTabContents({
           browserWindowOptions={tab.transparent ? TRANSPARENT_WINDOW : undefined}
           style={{
             position: "absolute",
-            inset: { top: layout.page.y, left: layout.page.x },
-            width: layout.page.width,
-            height: layout.page.height,
+            inset: { top: tab.rect.y, left: tab.rect.x },
+            width: tab.rect.width,
+            height: tab.rect.height,
             cornerRadius: seamRadius(Math.max(2, layout.rem * 0.55 - 1), dock, "page"),
             background: theme.bg,
           }}
+          onFocus={() => tabActions.focus(tab.id)}
           onChange={(state) => tabActions.state(tab.id, state)}
           onOpenWindow={(details) => tabActions.openWindow(tab.id, details)}
           onContextMenu={(params) => tabActions.contextMenu(tab.id, params)}
@@ -581,6 +585,35 @@ function BrowserTabContents({
 }
 
 const TRANSPARENT_WINDOW = { transparent: true, backgroundColor: "#00000000" };
+
+function SplitDivider({ layout, actions, theme }: {
+  layout: ChromeLayout;
+  actions: ChromeActions;
+  theme: Theme;
+}) {
+  const [left, right] = layout.splitPages!;
+  const x = left.x + left.width;
+  const width = right.x - x;
+  return (
+    <Box
+      id="split-divider"
+      style={{
+        position: "absolute",
+        inset: { top: left.y, left: x },
+        width,
+        height: left.height,
+        alignItems: "center",
+        justifyContent: "center",
+        hoverBackground: theme.hover,
+      }}
+      onDrag={actions.splitDividerDrag}
+      onMouseEnter={() => actions.splitDividerHover(true)}
+      onMouseLeave={() => actions.splitDividerHover(false)}
+    >
+      <Box style={{ width: 2, height: layout.rem * 2, cornerRadius: 1, background: theme.muted }} />
+    </Box>
+  );
+}
 
 const DIVIDER_ACTIVE = [58, 96, 168, 255] as const;
 const DIVIDER_GRIP = [118, 122, 132, 255] as const;
@@ -706,4 +739,3 @@ function ToolbarButton({
     </Box>
   );
 }
-

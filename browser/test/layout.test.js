@@ -37,3 +37,27 @@ test("sidebar stays bounded in narrow panes and page scaling preserves chrome si
   assert.equal(normal.toolbarHeight, scaled.toolbarHeight);
   assert.equal(normal.sidebarWidth, scaled.sidebarWidth);
 });
+
+test("split panes stay separate and within bounds with resize, sidebar and devtools", () => {
+  for (const width of [400, 1200]) {
+    for (const dock of [null, "right", "bottom"]) {
+      for (const fraction of [0.15, 0.5, 0.85]) {
+        for (const active of [0, 1]) {
+          const result = computeLayout(
+            { ...info, width }, 2, dock && { dock, fraction: 0.3 }, 0, "left", { fraction, active },
+          );
+          const [left, right] = result.chrome.splitPages;
+          assert.ok(left.x >= result.chrome.sidebarWidth);
+          assert.ok(left.x + left.width < right.x);
+          assert.ok(right.x + right.width <= width);
+          assert.ok(left.width > 0 && right.width > 0);
+          assert.equal(left.width % 2, 0);
+          assert.equal(right.width % 2, 0);
+          assert.deepEqual(result.chrome.page, result.chrome.splitPages[active]);
+          assert.equal(result.surface.x, result.chrome.page.x);
+          assert.equal(result.surface.width, result.chrome.page.width);
+        }
+      }
+    }
+  }
+});

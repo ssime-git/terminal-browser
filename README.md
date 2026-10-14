@@ -50,6 +50,8 @@ terminal-browser upgrade # upgrade to the latest version
 
 Tabs appear in a scrollable left sidebar. Use `terminal-browser config set tabs.position top` to move them to the toolbar. Mouse wheel scrolling defaults to 1.5× speed; adjust it with `terminal-browser config set scroll.speed 2` (0.25–5). Trackpad gestures keep their native speed. Page zoom and terminal font zoom preserve the tab and toolbar size; use the separate UI zoom shortcuts to resize browser controls.
 
+Use the split button in the toolbar or `Ctrl+\` to show two pages side by side. Split view uses another existing tab, or opens a new tab when needed. Click a page to focus it, then choose a sidebar tab to replace that pane. Drag the separator to resize the pages. Toggle split view again to expand the focused page; both tabs stay open.
+
 ### Use cases:
 - You can have a coding agent and website scoped to the same terminal tab
 - Your agent has full access to interact with open terminal-browsers, which gives your agent the capability to use the web
@@ -63,6 +65,9 @@ Tabs appear in a scrollable left sidebar. Use `terminal-browser config set tabs.
 | Quit | ctrl+q or ctrl+c | ctrl+q |
 | New tab | cmd+t | ctrl+t |
 | Edit URL | cmd+l | ctrl+l |
+| Copy URL | ctrl+shift+c | ctrl+shift+c |
+| Toggle split view | cmd+backslash or ctrl+backslash | ctrl+backslash |
+| Focus other pane | ctrl+alt+left / right | ctrl+alt+left / right |
 | Command palette | cmd+p | ctrl+k or alt+k |
 | Find in page | cmd+shift+f | ctrl+shift+f |
 | Next / previous match | enter / shift+enter | enter / shift+enter |

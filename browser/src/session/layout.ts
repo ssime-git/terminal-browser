@@ -92,6 +92,7 @@ export function computeLayout(
   devtools: DevtoolsPlacement | null,
   recordBar = 0,
   tabsPosition: "left" | "top" = "left",
+  splitView: { fraction: number; active: 0 | 1 } | null = null,
 ): SessionLayout {
   const toolbarHeight = Math.min(info.height - info.cellHeight, Math.round(info.basePx * 2.1));
   const pad = Math.round(info.basePx * 0.45);
@@ -112,11 +113,24 @@ export function computeLayout(
       height: Math.max(1, info.height - toolbarHeight - padBottom - recordBar),
     },
     devtools: null,
+    splitPages: null,
     rem: info.basePx,
   };
   const gap = Math.max(2, Math.round(info.basePx * 0.25));
   const split = splitForDevtools(chrome.page, devtools, gap);
   chrome.page = { ...split.page, ...snapToCssGrid(split.page.width, split.page.height, scale) };
+  if (splitView) {
+    const page = chrome.page;
+    const splitGap = Math.min(Math.max(8, gap), Math.max(0, page.width - 2));
+    const available = Math.max(2, page.width - splitGap);
+    const leftWidth = Math.max(1, Math.floor(available * clampDevtoolsFraction(splitView.fraction)));
+    const rightWidth = Math.max(1, available - leftWidth);
+    chrome.splitPages = [
+      { ...page, ...snapToCssGrid(leftWidth, page.height, scale) },
+      { ...page, x: page.x + leftWidth + splitGap, ...snapToCssGrid(rightWidth, page.height, scale) },
+    ];
+    chrome.page = chrome.splitPages[splitView.active];
+  }
   chrome.devtools = split.devtools && {
     ...split.devtools,
     ...snapToCssGrid(split.devtools.width, split.devtools.height, scale),
