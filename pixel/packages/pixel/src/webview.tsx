@@ -57,6 +57,7 @@ export interface WebViewProps {
   devtools?: boolean | DevtoolsDock;
   hidden?: boolean;
   keepFrame?: boolean;
+  scrollSpeed?: number;
   onChange?(state: WebViewState): void;
   onPointer?(event: PointerEvent): void;
   onContextMenu?(params: Electron.ContextMenuParams): void;
@@ -550,7 +551,7 @@ export const WebView = forwardRef<WebViewHandle, WebViewProps>(function WebView(
           }}
           onWheel={(event: WheelEvent) => {
             registry.focus(entry);
-            hostRef.current?.wheel(event);
+            hostRef.current?.wheel(event, propsRef.current.scrollSpeed);
           }}
           onMouseEnter={() => {
             hover.current.page = true;

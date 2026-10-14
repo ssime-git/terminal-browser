@@ -95,6 +95,21 @@ export const SETTINGS = {
     default: "off",
     choices: onOff,
   }),
+  "tabs.position": setting({
+    group: "general",
+    label: "Tab position",
+    hint: "Show tabs in the left sidebar or the top toolbar.",
+    schema: z.enum(["left", "top"]),
+    default: "left",
+    choices: [plain("left", "Left"), plain("top", "Top")],
+  }),
+  "scroll.speed": setting({
+    group: "general",
+    label: "Scroll speed",
+    hint: "Multiplier for mouse wheel scrolling. Trackpad gestures keep their native speed.",
+    schema: z.coerce.string().refine((value) => Number(value) >= 0.25 && Number(value) <= 5, "expected a multiplier between 0.25 and 5"),
+    default: "1.5",
+  }),
   "render.fps": setting({
     group: "advanced",
     label: "Frame rate",

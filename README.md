@@ -48,6 +48,8 @@ terminal-browser upgrade # upgrade to the latest version
 
 
 
+Tabs appear in a scrollable left sidebar. Use `terminal-browser config set tabs.position top` to move them to the toolbar. Mouse wheel scrolling defaults to 1.5× speed; adjust it with `terminal-browser config set scroll.speed 2` (0.25–5). Trackpad gestures keep their native speed. Page zoom and terminal font zoom preserve the tab and toolbar size; use the separate UI zoom shortcuts to resize browser controls.
+
 ### Use cases:
 - You can have a coding agent and website scoped to the same terminal tab
 - Your agent has full access to interact with open terminal-browsers, which gives your agent the capability to use the web
@@ -66,7 +68,8 @@ terminal-browser upgrade # upgrade to the latest version
 | Next / previous match | enter / shift+enter | enter / shift+enter |
 | Reload | cmd+r | ctrl+r |
 | Back / forward | cmd+[ / cmd+] or ctrl+[ / ctrl+] | ctrl+[ / ctrl+] |
-| Zoom in / out / reset | your terminal's zoom keybind | your terminal's zoom keybind |
+| Zoom page in / out / reset | cmd+plus / cmd+minus / cmd+0 | ctrl+plus / ctrl+minus / ctrl+0 |
+| Zoom UI in / out / reset | ctrl+alt+equals / ctrl+alt+minus / ctrl+alt+0 | ctrl+alt+equals / ctrl+alt+minus / ctrl+alt+0 |
 | Devtools | cmd+shift+i or f12 | ctrl+shift+i or f12 |
 | Devtools console | cmd+alt+j | ctrl+alt+j |
 | Copy / paste / cut | cmd+c / cmd+v / cmd+x | ctrl+c / ctrl+v / ctrl+x |

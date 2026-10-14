@@ -163,6 +163,7 @@ export interface ChromeLayout {
   width: number;
   height: number;
   toolbarHeight: number;
+  sidebarWidth: number;
   recordBarHeight: number;
   contentHeight: number;
   page: { x: number; y: number; width: number; height: number };

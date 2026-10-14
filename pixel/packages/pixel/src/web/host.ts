@@ -447,9 +447,9 @@ export class PageHost {
     this.input.pointer(event);
   }
 
-  wheel(event: WheelEvent) {
+  wheel(event: WheelEvent, speed = 1) {
     if (this.stopped) return;
-    this.input.wheel(event);
+    this.input.wheel(event, speed);
   }
 
   key(event: EngineKeyEvent) {

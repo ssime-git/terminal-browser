@@ -195,7 +195,10 @@ class Session {
   private readonly settings = new SettingsManager(
     {
       requestRender: () => this.render(),
-      settingsChanged: () => this.applyRenderSettings(),
+      settingsChanged: () => {
+        this.applyRenderSettings();
+        this.recalculateLayout();
+      },
       toast: (text, state) => this.showToast(text, state),
       setClipboard: (text) => this.root?.setClipboard(text),
       overlayOpened: () => this.enterOverlay([]),
@@ -551,6 +554,7 @@ class Session {
         tabViews={this.tabViews()}
         tabActions={this.tabActions}
         devtools={this.devtoolsView()}
+        scrollSpeed={Number(this.settings.get("scroll.speed"))}
         profiling={this.profiling}
         grabActive={this.activeGrab()?.active ?? false}
       />,
@@ -922,6 +926,7 @@ class Session {
   }
 
   private uiZoom = 1;
+  private uiBasePx: number | null = null;
 
   private zoomUi(direction: ZoomDirection) {
     const step = 1.1;
@@ -1545,12 +1550,14 @@ class Session {
   private recalculateLayout(placement: DevtoolsPlacement | null = this.devtoolsPlacement()) {
     if (!this.root) return;
     const reviewing = this.activeRecord()?.reviewing ?? false;
-    const info = { ...this.root.info, basePx: this.root.info.basePx * this.uiZoom };
+    this.uiBasePx ??= this.root.info.basePx;
+    const info = { ...this.root.info, basePx: this.uiBasePx * this.uiZoom };
     const result = computeLayout(
       info,
       this.root.displayScale,
       reviewing ? null : placement,
       reviewing ? recordBarHeight(info) : 0,
+      this.settings.get("tabs.position"),
     );
     this.layout = result.chrome;
     this.surfaceLayout = result.surface;

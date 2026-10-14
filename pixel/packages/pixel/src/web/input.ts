@@ -96,14 +96,14 @@ export class PageInput {
     this.lastSentY = y;
   }
 
-  wheel(event: WheelEvent) {
+  wheel(event: WheelEvent, speed = 1) {
     this.syncFocus();
     if (event.mods.ctrl && event.precise) {
       this.pinch(event);
       return;
     }
     if (!event.precise) {
-      this.wheelTick(event);
+      this.wheelTick(event, speed);
       return;
     }
     const scale = this.target.scale();
@@ -129,19 +129,19 @@ export class PageInput {
   }
 
 
-  private wheelTick(event: WheelEvent) {
+  private wheelTick(event: WheelEvent, speed: number) {
     const ticksX = -Math.sign(event.deltaX);
     const ticksY = -Math.sign(event.deltaY);
     if (ticksX === 0 && ticksY === 0) return;
-    const step = WHEEL_DETENT_PX;
+    const step = WHEEL_DETENT_PX * speed;
     this.send({
       type: "mouseWheel",
       x: this.lastX,
       y: this.lastY,
       deltaX: ticksX * step,
       deltaY: ticksY * step,
-      wheelTicksX: ticksX,
-      wheelTicksY: ticksY,
+      wheelTicksX: ticksX * speed,
+      wheelTicksY: ticksY * speed,
       hasPreciseScrollingDeltas: false,
       canScroll: true,
       modifiers: this.pointerModifiers(event.mods),

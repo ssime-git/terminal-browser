@@ -91,21 +91,24 @@ export function computeLayout(
   scale: number,
   devtools: DevtoolsPlacement | null,
   recordBar = 0,
+  tabsPosition: "left" | "top" = "left",
 ): SessionLayout {
   const toolbarHeight = Math.min(info.height - info.cellHeight, Math.round(info.basePx * 2.1));
   const pad = Math.round(info.basePx * 0.45);
   const padLeft = Math.round(info.basePx * 0.2);
   const padBottom = Math.round(info.basePx * 0.2);
+  const sidebarWidth = tabsPosition === "left" ? Math.round(Math.min(info.basePx * 13, info.width * 0.3)) : 0;
   const chrome: ChromeLayout = {
     width: info.width,
     height: info.height,
     toolbarHeight,
+    sidebarWidth,
     recordBarHeight: recordBar,
     contentHeight: Math.max(1, info.height - toolbarHeight - recordBar),
     page: {
-      x: padLeft,
+      x: sidebarWidth + padLeft,
       y: toolbarHeight,
-      width: Math.max(1, info.width - padLeft - pad),
+      width: Math.max(1, info.width - sidebarWidth - padLeft - pad),
       height: Math.max(1, info.height - toolbarHeight - padBottom - recordBar),
     },
     devtools: null,

@@ -303,3 +303,14 @@ test("render settings map to engine values and the startup env", () => {
     TERMINAL_BROWSER_FRAMES: "inline",
   });
 });
+
+test("plus zooms the page without colliding with UI zoom on Linux and macOS", () => {
+  const map = new Keymap({}, { noSuper: false });
+  for (const mods of [{ ctrl: true }, { super: true }]) {
+    assert.equal(map.match(press("=", mods)), "zoom.in");
+    assert.equal(map.match(press("+", { ...mods, shift: true })), "zoom.in");
+    assert.equal(map.match(press("-", mods)), "zoom.out");
+    assert.equal(map.match(press("0", mods)), "zoom.reset");
+  }
+  assert.equal(map.match(press("=", { ctrl: true, alt: true })), "ui.zoom.in");
+});

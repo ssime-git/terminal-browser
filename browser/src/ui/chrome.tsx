@@ -15,6 +15,8 @@ import {
   RecordToolbarPill,
   ReviewToolbar,
 } from "./record-bar";
+import { VerticalTabs } from "./vertical-tabs";
+import { displayUrl } from "../url";
 import { TabStrip } from "./tab-strip";
 import { makeTheme, mix, withAlpha } from "./theme";
 import type { Theme } from "./theme";
@@ -59,6 +61,7 @@ export function Chrome({
   devtools,
   profiling,
   grabActive,
+  scrollSpeed,
 }: {
   state: WebViewState;
   actions: ChromeActions;
@@ -83,6 +86,7 @@ export function Chrome({
   devtools: DevtoolsView | null;
   profiling: boolean;
   grabActive: boolean;
+  scrollSpeed: number;
 }) {
   const theme = useMemo(() => makeTheme(colors), [colors]);
   const progress = useProgress(state.loading);
@@ -115,6 +119,9 @@ export function Chrome({
             grabActive={grabActive}
           />
         ))}
+      {layout.sidebarWidth > 0 && (
+        <VerticalTabs tabs={tabs} actions={actions} layout={layout} theme={theme} />
+      )}
       <BrowserTabContents
         layout={layout}
         theme={theme}
@@ -122,6 +129,7 @@ export function Chrome({
         tabActions={tabActions}
         agentActive={agentActive}
         coveredByReview={record?.canvas != null}
+        scrollSpeed={scrollSpeed}
       />
       {agentActive && <AgentGlow layout={layout} theme={theme} intensity={glowPulse} />}
       {layout.devtools && devtools && (
@@ -327,14 +335,33 @@ function Toolbar({
         theme={theme}
         onClick={actions.reload}
       />
-      <TabStrip
-        tabs={tabs}
-        actions={actions}
-        rem={rem}
-        width={stripWidth}
-        url={state.url}
-        theme={theme}
-      />
+      {layout.sidebarWidth > 0 ? (
+        <Box
+          style={{
+            flexGrow: 1,
+            flexBasis: 0,
+            minWidth: 0,
+            overflow: "hidden",
+            padding: rem * 0.4,
+            cornerRadius: rem * 0.3,
+            hoverBackground: theme.hover,
+          }}
+          onClick={actions.urlEdit}
+        >
+          <Text style={{ fontSize: rem * 0.82, wrap: false, ellipsis: true, selectable: false }}>
+            {displayUrl(state.url) || state.title}
+          </Text>
+        </Box>
+      ) : (
+        <TabStrip
+          tabs={tabs}
+          actions={actions}
+          rem={rem}
+          width={stripWidth}
+          url={state.url}
+          theme={theme}
+        />
+      )}
       <ToolbarButton
         icon="select"
         enabled
@@ -495,6 +522,7 @@ function BrowserTabContents({
   tabActions,
   agentActive,
   coveredByReview,
+  scrollSpeed,
 }: {
   layout: ChromeLayout;
   theme: Theme;
@@ -502,6 +530,7 @@ function BrowserTabContents({
   tabActions: TabActions;
   agentActive: boolean;
   coveredByReview: boolean;
+  scrollSpeed: number;
 }) {
   const dock = layout.devtools?.dock ?? null;
   return (
@@ -530,6 +559,7 @@ function BrowserTabContents({
           proxy={tab.proxy ?? undefined}
           preload={tab.preload ?? undefined}
           clipboardRead={tab.clipboardRead}
+          scrollSpeed={scrollSpeed}
           browserWindowOptions={tab.transparent ? TRANSPARENT_WINDOW : undefined}
           style={{
             position: "absolute",
