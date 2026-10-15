@@ -166,6 +166,7 @@ export interface ChromeLayout {
   width: number;
   height: number;
   toolbarHeight: number;
+  tabsPosition: "left" | "top";
   sidebarWidth: number;
   recordBarHeight: number;
   contentHeight: number;

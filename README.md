@@ -48,7 +48,7 @@ terminal-browser upgrade # upgrade to the latest version
 
 
 
-Tabs appear in a scrollable left sidebar. Use `terminal-browser config set tabs.position top` to move them to the toolbar. Mouse wheel scrolling defaults to 1.5× speed; adjust it with `terminal-browser config set scroll.speed 2` (0.25–5). Trackpad gestures keep their native speed. Page zoom and terminal font zoom preserve the tab and toolbar size; use the separate UI zoom shortcuts to resize browser controls.
+Tabs appear in a scrollable left sidebar. Press `Ctrl+S` to hide or show the sidebar and give its space back to the page or split view. Use `terminal-browser config set tabs.position top` to move them to the toolbar. Mouse wheel scrolling defaults to 1.5× speed; adjust it with `terminal-browser config set scroll.speed 2` (0.25–5). Trackpad gestures keep their native speed. Page zoom and terminal font zoom preserve the tab and toolbar size; use the separate UI zoom shortcuts to resize browser controls.
 
 Use the split button in the toolbar or `Ctrl+\` to show two pages side by side. Split view uses another existing tab, or opens a new tab when needed. Click a page to focus it, then choose a sidebar tab to replace that pane. Drag the separator to resize the pages. Toggle split view again to expand the focused page; both tabs stay open.
 

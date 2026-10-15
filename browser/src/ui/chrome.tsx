@@ -336,7 +336,7 @@ function Toolbar({
         theme={theme}
         onClick={actions.reload}
       />
-      {layout.sidebarWidth > 0 ? (
+      {layout.tabsPosition === "left" ? (
         <Box
           style={{
             flexGrow: 1,

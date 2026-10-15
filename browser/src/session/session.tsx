@@ -269,6 +269,7 @@ class Session {
   private recordStarting = false;
   private readonly defaultUrl: string;
   private sessionHidden = false;
+  private sidebarCollapsed = false;
 
   constructor(ctx: SessionContext) {
     this.ctx = ctx;
@@ -902,6 +903,13 @@ class Session {
           this.showToast("URL copied to clipboard", "done");
         }
         return;
+      case "sidebar.toggle":
+        if (this.settings.get("tabs.position") === "left") {
+          this.sidebarCollapsed = !this.sidebarCollapsed;
+          this.recalculateLayout();
+          this.render();
+        }
+        return;
       case "split.toggle":
         this.tabs.toggleSplit();
         return;
@@ -1501,6 +1509,7 @@ class Session {
     return [
       command("find"),
       command("url.copy"),
+      ...(this.settings.get("tabs.position") === "left" ? [command("sidebar.toggle")] : []),
       command("split.toggle"),
       command("split.focus"),
       command("record.toggle"),
@@ -1563,6 +1572,8 @@ class Session {
 
   private paletteLabel(id: CommandId): string {
     switch (id) {
+      case "sidebar.toggle":
+        return this.sidebarCollapsed ? "Show tab sidebar" : "Hide tab sidebar";
       case "record.toggle": {
         const record = this.activeRecord();
         if (!record) return "Record page";
@@ -1602,6 +1613,7 @@ class Session {
       this.tabs.split && !reviewing
         ? { fraction: this.splitFraction, active: this.tabs.split[0] === this.tabs.active?.id ? 0 : 1 }
         : null,
+      this.sidebarCollapsed,
     );
     this.layout = result.chrome;
     this.surfaceLayout = result.surface;

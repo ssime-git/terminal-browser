@@ -15,6 +15,7 @@ export const COMMANDS = {
   "settings.open": { label: "Settings", keys: shared(["ctrl+,"]) },
   "tab.new": { label: "New tab", keys: platform(["cmd+t", "ctrl+t"], ["ctrl+t"]) },
   "tab.close": { label: "Close tab", keys: platform(["cmd+w"], ["ctrl+w"]) },
+  "sidebar.toggle": { label: "Toggle tab sidebar", keys: shared(["ctrl+s"]) },
   "url.edit": { label: "Edit URL", keys: platform(["cmd+l"], ["ctrl+l"]) },
   "url.copy": { label: "Copy URL", keys: shared(["ctrl+shift+c"]) },
   "split.toggle": { label: "Toggle split view", keys: shared(["ctrl+\\", "cmd+\\"]) },
